@@ -2,7 +2,9 @@
 
 $imageSize=100;
 
-$directory = dirname(__FILE__).'/assets';
+$destination = "/joueurs/FR";
+
+$directory = dirname(__FILE__).$destination;
 $files = array_diff(scandir($directory), array('..', '.'));
 foreach ($files as $file) {
 	if (strstr($file, '-part-') === false) {
@@ -11,7 +13,7 @@ foreach ($files as $file) {
 }
 
 function splitImage($img) {
-	$source = @imagecreatefromjpeg($img);
+	$source = @imagecreatefrompng($img);
 	$sourceName = pathinfo($img, PATHINFO_FILENAME);
 	$width = @imagesx($source);
 	$height = @imagesy($source);
@@ -27,9 +29,9 @@ function splitImage($img) {
 		$destTmp = @imagecreatetruecolor(round($width / 2), round($height / 2));
 		// imagecopyresized ( resource $dst_image , resource $src_image , int $dst_x , int $dst_y , int $src_x , int $src_y , int $dst_w , int $dst_h , int $src_w , int $src_h )
 		@imagecopyresized($destTmp, $source, 0, 0, $coords[0], $coords[1], round($width/2), round($height/2), round($width/2), round($height/2));
-		$baseDir = dirname(__FILE__).'/assets';
+		$baseDir = dirname(__FILE__).$destination;
 		$partName = "$baseDir/$sourceName-part-$partIdentifier.jpeg";
-		@imagejpeg($destTmp, $partName);
+		@imagepng($destTmp, $partName);
 		@imagedestroy($destTmp);
 		$partIdentifier++;
 	}
