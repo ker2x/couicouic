@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<title>Test visuel de positions</title>
+		<script type="text/javascript" src="random_placement.js"></script>
+	</head>
+	<body style="margin: 0; padding: 0;">
+		<div id="game" style="height: 600px; width: 800px; background: #99FF99; margin: 0; padding: 0;">
+		</div>
+		<script>
+			combinaisons = placement();
+			console.log(combinaisons);
+
+			var nb = 0;
+			// place player
+			for (var team = nb_team - 1; team >= 0; team--) {
+				// placement for each team
+				for (var player = nb_player - 1; player >= 0; player--) {
+					// placement for each player
+					// use combinaisons[n]
+					var myDiv = document.createElement('div');
+					myDiv.id = "player"+nb;
+					myDiv.style.border = "1px solid " + color[team];
+					myDiv.style.position = "absolute";
+					myDiv.style.left =  combinaisons[nb][0] +"px";
+					myDiv.style.top =  combinaisons[nb][1] +"px";
+					myDiv.style.height = icon_size+"px";
+					myDiv.style.width = icon_size +"px";
+					myDiv.style.background= "url(team"+[team]+"/player"+[player]+".png);";
+					document.getElementById('game').appendChild(myDiv);
+					nb++;
+				};
+			};
+
+		</script>
+
+	</body>
+</html>
