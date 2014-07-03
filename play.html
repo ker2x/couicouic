@@ -24,15 +24,15 @@
       <h2>Your score</h2>
       <h3>
         Head cutted :
-        <span class="label label-danger">6 heads</span>
+        <span class="label label-danger"><span id="heads">O</span> heads</span>
       </h3>
       <h3>
         Distance :
-        <span class="label label-info">984 meters</span>
+        <span class="label label-info"><span id="distance">O</span> meters</span>
       </h3>
       <h3>
         Points :
-        <span class="label label-success">12540 points</span>
+        <span class="label label-success"><span id="score">0</span> points</span>
       </h3>
     </div>
     <div class="col-lg-6">
@@ -82,7 +82,7 @@
 
 <script type="text/processing" data-processing-target="mycanvas">
 // size : 800*600
-var ICON_SIZE = 20; // used to calculat position for left corner
+var ICON_SIZE = 45; // used to calculat position for left corner
 var GAME_WIDTH = 800;
 var GAME_HEIGHT = 600;
 var FIELD_WIDTH = 760;
@@ -92,6 +92,7 @@ var MAX_REBOUNDS = 8;
 var STEP_PLAYER_POSITION = 1;
 var STEP_PLAYER_ANGLE = 2;
 var STEP_PLAYER_LASERING = 3;
+var MARGIN_COLISSION = 22;
 var nb_player = 11;
 var nb_team = 2;
 var color = ['white','blue']; 
@@ -100,10 +101,15 @@ var color = ['white','blue'];
 var angle = 0;
 var x = MARGIN_TOP_LEFT;
 var y = 200;
-var velocity = 70;
+var velocity = 20;
 var nbRebounds = 0;
 var step = STEP_PLAYER_POSITION;
 var playersPositions;
+var sound;
+var currentScoreIncrement = 10;
+var currentScore = 0;
+var heads = 0;
+var distance = 0;
 
 void setup()
 {
@@ -115,7 +121,7 @@ void setup()
   loadImages();
   drawField();
   stroke(0, 255, 255);
-  
+  sound = new Audio("keru/scream.mp3");
 }
 
 function loadImages() {
@@ -146,6 +152,16 @@ function drawField() {
   line(MARGIN_TOP_LEFT, FIELD_HEIGHT, FIELD_WIDTH, FIELD_HEIGHT);
 
   drawPlayers();
+}
+
+function checkColission() {
+  var touched = []; //touché
+
+  touched = playersPositions.filter( function(p) {
+    return p[0] <= x + MARGIN_COLISSION &&  p[0] >= x - MARGIN_COLISSION &&  p[1] <= y + MARGIN_COLISSION &&  p[1] >= y - MARGIN_COLISSION;
+  });
+
+  return touched;
 }
 
 function reverseAngleVertically() {
@@ -248,12 +264,29 @@ function drawStepPlayerLasering() {
 
   if(nbRebounds >= MAX_REBOUNDS) {
     velocity = 0;
+  } else {
+    distance += velocity;
   }
 
   line(x, y, nextX, nextY);
 
   x = nextX;
   y = nextY;
+
+  collisions = checkColission();
+  if(collisions.length > 0) {
+    sound.pause();
+    sound.currentTime = 0;
+    sound.play();
+
+    currentScore += currentScoreIncrement;
+    currentScoreIncrement += 10;
+    heads++;
+    document.getElementById("score").innerHTML = currentScore;
+    document.getElementById("heads").innerHTML = heads;
+  }
+  document.getElementById("distance").innerHTML = distance;
+  
 }
 
 function placement() {
