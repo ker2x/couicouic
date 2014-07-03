@@ -67,7 +67,7 @@
 			angle = -angle;
 		}
 
-		void draw(){  
+		void draw(){
 			if(step == STEP_PLAYER_POSITION) {
 				drawStepPlayerPosition();
 			} else if(step == STEP_PLAYER_ANGLE) {
@@ -116,19 +116,19 @@
 				nextY = FIELD_HEIGHT;
 				rebound = true;
 				reverseAngleHorizontally();
-			} 
+			}
 			if(nextY < MARGIN_TOP_LEFT) {
 				nextX = x + Math.tan(Math.PI / 2 + angle) * (y-MARGIN_TOP_LEFT);
 				nextY = MARGIN_TOP_LEFT;
 				rebound = true;
 				reverseAngleHorizontally();
-			} 
+			}
 			if(nextX > FIELD_WIDTH) {
 				nextY = y + Math.tan(angle) * (FIELD_WIDTH - x);
 				nextX = FIELD_WIDTH;
 				rebound = true;
 				reverseAngleVertically();
-			} 
+			}
 			if(nextX < MARGIN_TOP_LEFT) {
 				nextY = y - Math.tan(angle) * (x - MARGIN_TOP_LEFT);
 				nextX = MARGIN_TOP_LEFT;
