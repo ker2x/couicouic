@@ -17,8 +17,7 @@
 
 <div class="container">
   <!--PROCESSING NEEDED-->
-  <div  id="game" style="height: 600px; width: 800px; background: #99FF99; margin: 0; padding: 0;">
-  </div>
+  <canvas id="mycanvas" style="height: 600px; width: 800px; background: #99FF99; margin: 0; padding: 0;"  height="600" width="600"></canvas>
 
   <div class="row marketing">
     <div class="col-lg-6">
@@ -76,39 +75,209 @@
 
 <!--PROCESSING-->
 <script src="js/processing.js"></script>
-<script src="js/app.js"></script>
-<script>
-  combinaisons = placement();
-  console.log(combinaisons);
-
-  var nb = 0;
-  // place player
-  for (var team = nb_team - 1; team >= 0; team--) {
-    // placement for each team
-    for (var player = nb_player - 1; player >= 0; player--) {
-      // placement for each player
-      // use combinaisons[n]
-      var myDiv = document.createElement('div');
-      myDiv.id = "player"+nb;
-      myDiv.style.border = "1px solid " + color[team];
-      myDiv.style.position = "relative";
-      myDiv.style.float = "left";
-      myDiv.style.clear = "both";
-      myDiv.style.left = combinaisons[nb][0] +"px";
-      myDiv.style.top = combinaisons[nb][1]-nb*icon_size +"px";
-      myDiv.style.height = icon_size+"px";
-      myDiv.style.width = icon_size +"px";
-      myDiv.style.background = "url('team"+[team]+"/player"+[player]+".png')";
-      document.getElementById('game').appendChild(myDiv);
-      nb++;
-    };
-  };
-
-</script>
-
 
 <!--document.getElementById('scream').play();-->
 <audio id="scream" src="keru/scream.mp3"></audio>
 
+
+<script type="text/processing" data-processing-target="mycanvas">
+// size : 800*600
+var ICON_SIZE = 20; // used to calculat position for left corner
+var GAME_WIDTH = 800;
+var GAME_HEIGHT = 600;
+var FIELD_WIDTH = 760;
+var FIELD_HEIGHT = 560;
+var MARGIN_TOP_LEFT = 40;
+var MAX_REBOUNDS = 8;
+var STEP_PLAYER_POSITION = 1;
+var STEP_PLAYER_ANGLE = 2;
+var STEP_PLAYER_LASERING = 3;
+var nb_player = 11;
+var nb_team = 2;
+var color = ['white','blue']; 
+
+
+var angle = 0;
+var x = MARGIN_TOP_LEFT;
+var y = 200;
+var velocity = 70;
+var nbRebounds = 0;
+var step = STEP_PLAYER_POSITION;
+var playersPositions;
+
+void setup()
+{
+  playersPositions = placement();
+  size(GAME_WIDTH, GAME_HEIGHT);
+  strokeWeight(4);
+  background(0, 100, 0);
+  fill(255);
+  drawField();
+  stroke(0, 255, 255);
+}
+
+function drawPlayers() {
+  for(var i=0;i<playersPositions.length;i++) {
+    point(playersPositions[i][0], playersPositions[i][1]);
+  }
+
+}
+
+function drawField() {
+  stroke(0, 200, 0);
+  strokeWeight(4);
+  line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_HEIGHT);
+  line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_WIDTH, MARGIN_TOP_LEFT);
+  line(FIELD_WIDTH, MARGIN_TOP_LEFT, FIELD_WIDTH, FIELD_HEIGHT);
+  line(MARGIN_TOP_LEFT, FIELD_HEIGHT, FIELD_WIDTH, FIELD_HEIGHT);
+
+  drawPlayers();
+}
+
+function reverseAngleVertically() {
+  if(angle >= 0 && angle <= Math.PI / 2) {
+    angle = Math.PI - angle;
+  } else if(angle < 0 && angle >= -Math.PI / 2) {
+    angle = -Math.PI - angle;
+  } else if(angle > Math.PI / 2 && angle <= Math.PI) {
+    angle = Math.PI - angle;
+  } else  {
+    angle = -Math.PI - angle;
+  }
+}
+
+void mouseClicked() {
+  if(step == STEP_PLAYER_POSITION) {
+    step = STEP_PLAYER_ANGLE;
+  } else if(step == STEP_PLAYER_ANGLE) {
+    step = STEP_PLAYER_LASERING;
+  }
+  console.log("clic");
+}
+
+function reverseAngleHorizontally() {
+  angle = -angle;
+}
+
+void draw(){  
+  if(step == STEP_PLAYER_POSITION) {
+    drawStepPlayerPosition();
+  } else if(step == STEP_PLAYER_ANGLE) {
+    drawStepPlayerAngle();
+  } else if(step == STEP_PLAYER_LASERING) {
+    drawStepPlayerLasering();
+  }
+}
+
+function drawStepPlayerPosition() {
+  background();
+  drawField();
+  strokeWeight(20);
+  if(mouseY < MARGIN_TOP_LEFT) {
+    y = MARGIN_TOP_LEFT;
+  } else if(mouseY > FIELD_HEIGHT) {
+    y = FIELD_HEIGHT;
+  } else {
+    y = mouseY;
+  }
+  stroke(255, 0, 0);
+  point(MARGIN_TOP_LEFT, y);
+}
+function drawStepPlayerAngle() {
+  background();
+  drawField();
+  strokeWeight(20);
+  stroke(255, 0, 0);
+  point(MARGIN_TOP_LEFT, y);
+  strokeWeight(2);
+
+  angle = - Math.atan((mouseY - y) / (x - mouseX));
+
+  line(x, y, x + Math.cos(angle) * 30, y + Math.sin(angle) * 30);
+
+}
+function drawStepPlayerLasering() {
+  var nextX = x + Math.cos(angle) * velocity;
+  var nextY = y + Math.sin(angle) * velocity;
+  strokeWeight(4);
+  stroke(255, 0, 255);
+
+  var rebound = false;
+  if(nextY > FIELD_HEIGHT) {
+    nextX = x - Math.tan(Math.PI / 2 + angle) * (FIELD_HEIGHT - y);
+    nextY = FIELD_HEIGHT;
+    rebound = true;
+    reverseAngleHorizontally();
+  } 
+  if(nextY < MARGIN_TOP_LEFT) {
+    nextX = x + Math.tan(Math.PI / 2 + angle) * (y-MARGIN_TOP_LEFT);
+    nextY = MARGIN_TOP_LEFT;
+    rebound = true;
+    reverseAngleHorizontally();
+  } 
+  if(nextX > FIELD_WIDTH) {
+    nextY = y + Math.tan(angle) * (FIELD_WIDTH - x);
+    nextX = FIELD_WIDTH;
+    rebound = true;
+    reverseAngleVertically();
+  } 
+  if(nextX < MARGIN_TOP_LEFT) {
+    nextY = y - Math.tan(angle) * (x - MARGIN_TOP_LEFT);
+    nextX = MARGIN_TOP_LEFT;
+    rebound = true;
+   reverseAngleVertically()
+  }
+
+  if(rebound) {
+    nbRebounds++;
+  }
+
+  if(nbRebounds >= MAX_REBOUNDS) {
+    velocity = 0;
+  }
+
+  line(x, y, nextX, nextY);
+
+  x = nextX;
+  y = nextY;
+}
+
+function placement() {
+  // do not place too high, near the border, etc...
+  var min_height = ICON_SIZE + MARGIN_TOP_LEFT;
+  var max_height = GAME_HEIGHT - 2 * ICON_SIZE;
+  var min_width = ICON_SIZE + MARGIN_TOP_LEFT;
+  var max_width = GAME_WIDTH - 2 * ICON_SIZE;
+
+  // create enough random position
+  var combinaisons = Array();
+  while (combinaisons.length < nb_player * nb_team) {
+    var nb = combinaisons.length;
+    var w = Math.floor(Math.random() * (max_width - min_width + 1) + min_width);
+    var h = Math.floor(Math.random() * (max_height - min_height + 1) + min_height);
+
+    // check for not too near icon
+    var is_ok = true;
+    var x = 0;
+    while (x < combinaisons.length && is_ok) {
+      if (   w > combinaisons[x][0] - ICON_SIZE 
+        && w < combinaisons[x][0] + ICON_SIZE 
+        && h > combinaisons[x][1] - ICON_SIZE 
+        && h < combinaisons[x][1] + ICON_SIZE) {
+        console.log("Un joueur mort sur la pelouse, appel du remplacant");
+        is_ok = false;
+      }
+      // check and set is_ok to false if needed
+      x++;
+    }
+    // Save the coords
+    if (is_ok) {
+      combinaisons[nb] = Array(w, h);
+    }
+  }
+  return combinaisons;
+}
+
+</script>
 </body>
 </html>
