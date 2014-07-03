@@ -92,7 +92,7 @@ var MAX_REBOUNDS = 8;
 var STEP_PLAYER_POSITION = 1;
 var STEP_PLAYER_ANGLE = 2;
 var STEP_PLAYER_LASERING = 3;
-var MARGIN_COLISSION = 22;
+var MARGIN_COLISSION = 45;
 var nb_player = 11;
 var nb_team = 2;
 var color = ['white','blue']; 
@@ -158,7 +158,7 @@ function checkColission() {
   var touched = []; //touché
 
   touched = playersPositions.filter( function(p) {
-    return p[0] <= x + MARGIN_COLISSION &&  p[0] >= x - MARGIN_COLISSION &&  p[1] <= y + MARGIN_COLISSION &&  p[1] >= y - MARGIN_COLISSION;
+    return p[0] <= x &&  p[0] >= x - MARGIN_COLISSION &&  p[1] <= y &&  p[1] >= y - MARGIN_COLISSION;
   });
 
   return touched;
@@ -227,6 +227,9 @@ function drawStepPlayerAngle() {
 
 }
 function drawStepPlayerLasering() {
+  background();
+  drawField();
+  
   var nextX = x + Math.cos(angle) * velocity;
   var nextY = y + Math.sin(angle) * velocity;
   strokeWeight(4);
@@ -275,6 +278,12 @@ function drawStepPlayerLasering() {
 
   collisions = checkColission();
   if(collisions.length > 0) {
+
+    //delete first player touched
+    playersPositions = playersPositions.filter(function(p) {
+      return p[0] != collisions[0][0] && p[1] != collisions[0][1];
+    });
+
     sound.pause();
     sound.currentTime = 0;
     sound.play();
@@ -291,9 +300,9 @@ function drawStepPlayerLasering() {
 
 function placement() {
   // do not place too high, near the border, etc...
-  var min_height = ICON_SIZE + MARGIN_TOP_LEFT;
+  var min_height = MARGIN_TOP_LEFT;
   var max_height = GAME_HEIGHT - 2 * ICON_SIZE;
-  var min_width = ICON_SIZE + MARGIN_TOP_LEFT;
+  var min_width = MARGIN_TOP_LEFT;
   var max_width = GAME_WIDTH - 2 * ICON_SIZE;
 
   // create enough random position
