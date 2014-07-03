@@ -23,7 +23,7 @@
     <div class="col-lg-6">
       <h2>Your score</h2>
       <h3>
-        Head cutted :
+        Heads cut :
         <span class="label label-danger"><span id="heads">O</span> heads</span>
       </h3>
       <h3>
@@ -40,27 +40,12 @@
       <table class="table table-striped">
         <thead>
         <tr>
-          <th>#</th>
-          <th>Nickname</th>
           <th>Points</th>
+          <th>Distance</th>
+          <th>Heads cut</th>
         </tr>
         </thead>
-        <tbody>
-        <tr>
-          <td>1</td>
-          <td>Mark</td>
-          <td>6 548 000</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Jacob</td>
-          <td>1 548 000</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Larry</td>
-          <td>48 000</td>
-        </tr>
+        <tbody id="highScores">
         </tbody>
       </table>
     </div>
@@ -160,6 +145,7 @@ var color = ['white','blue'];
 
 
 var angle = 0;
+var cptGameOver = 0;
 var x = MARGIN_TOP_LEFT;
 var y = 200;
 var velocity = 20;
@@ -172,6 +158,7 @@ var currentScore = 0;
 var heads = 0;
 var distance = 0;
 var bloodSprites = null;
+var highScores = []; 
 
 void setup()
 {
@@ -335,7 +322,47 @@ function drawStepPlayerLasering() {
   }
 
   if(nbRebounds >= MAX_REBOUNDS) {
-    velocity = 0;
+   //GAME OVER
+   if( cptGameOver != 1 ){
+      cptGameOver = 1;
+
+        var score = {
+      'currentScore' : currentScore,
+      'heads' :        heads,
+      'distance' :     distance
+      };
+      highScores.push(score);
+
+        //sort
+        if(highScores.length > 1){
+
+            highScores.sort(function(a,b){
+              console.log(a);
+              return a.currentScore - b.currentScore;
+            });
+        }
+        // //display
+        var str = "";
+        for(var i =0; i < highScores.length; i++){
+           str += "<tr>"+
+            "<td>" +
+              highScores[i].currentScore + 
+            "</td>"+
+            "<td>"+
+            highScores[i].distance +
+            "</td>"+
+            "<td>"+
+             highScores[i].heads +
+            "</td>"+
+          "</tr>";
+        }
+
+        // TODO Sort
+        console.log("str",str);
+        document.getElementById("highScores").innerHTML = str;    
+      }
+      velocity = 0;
+    
   } else {
     distance += velocity;
   }
