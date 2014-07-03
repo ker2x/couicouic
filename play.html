@@ -79,8 +79,69 @@
 <!-- document.getElementById('scream').play(); -->
 <audio id="scream" src="keru/scream.mp3"></audio>
 
-
 <script type="text/processing" data-processing-target="mycanvas">
+
+class BloodSprites {
+  int MAX_SPLATTERS=10;
+  int FRAMES_PER_SPRITE=8;
+
+  PImage[] imagesA;
+  PImage[] imagesB;
+  int imageCount = 6;
+
+  float[] splattersX;
+  float[] splattersY;
+  float[] splattersFrameIdx;
+  int splattersNext;
+
+  BloodSprites() {
+    imagesA = new PImage[imageCount];
+    imagesB = new PImage[imageCount];
+
+    for (int i = 0; i < imageCount; i++) {
+      imagesA[i] = loadImage("blood_a_" + nf(i+1, 4) + ".png");
+      imagesB[i] = loadImage("blood_b_" + nf(i+1, 4) + ".png");
+    }
+
+    splattersX = new float[MAX_SPLATTERS];
+    splattersY = new float[MAX_SPLATTERS];
+    splattersFrameIdx = new float[MAX_SPLATTERS];
+    for (int i = 0; i < MAX_SPLATTERS; i++) {
+      splattersFrameIdx[i] = -1;
+    }
+  }
+
+  void addSplatter(float x, float y) {
+    splattersX[splattersNext] = x;
+    splattersY[splattersNext] = y;
+    splattersFrameIdx[splattersNext] = 0;
+    splattersNext = (splattersNext+1) % MAX_SPLATTERS;
+  }
+
+  void draw() {
+    imageMode(CENTER);
+    for (int i = 0; i < MAX_SPLATTERS; i++) {
+      if (splattersFrameIdx[i] == -1) continue;
+      int idx = floor(splattersFrameIdx[i]);
+      if (idx < imageCount) {
+        splattersFrameIdx[i] += 1/FRAMES_PER_SPRITE;
+        PImage img;
+        if(i % 2 == 0) {
+          img = imagesA[idx];
+        } else {
+          img = imagesB[idx];
+        }
+        image(img, splattersX[i], splattersY[i]);
+      } else {
+        splattersFrameIdx[i] = -1;
+      }
+    }
+    imageMode(CORNERS);
+  }
+}
+
+/* @pjs preload="blood_a_0001.png, blood_a_0002.png, blood_a_0003.png, blood_a_0004.png, blood_a_0005.png, blood_a_0006.png, blood_b_0001.png, blood_b_0002.png, blood_b_0003.png, blood_b_0004.png, blood_b_0005.png, blood_b_0006.png"; */
+
 // size : 800*600
 var ICON_SIZE = 45; // used to calculat position for left corner
 var GAME_WIDTH = 800;
@@ -110,6 +171,7 @@ var currentScoreIncrement = 10;
 var currentScore = 0;
 var heads = 0;
 var distance = 0;
+var bloodSprites = null;
 
 void setup()
 {
@@ -121,6 +183,7 @@ void setup()
   loadImages();
   drawField();
   stroke(0, 255, 255);
+  bloodSprites = new BloodSprites();
   sound = new Audio("keru/scream.mp3");
 }
 
@@ -160,6 +223,9 @@ function checkColission() {
   touched = playersPositions.filter( function(p) {
     return p[0] <= x &&  p[0] >= x - MARGIN_COLISSION &&  p[1] <= y &&  p[1] >= y - MARGIN_COLISSION;
   });
+  touched.map(function(p) {
+    bloodSprites.addSplatter(p[0],p[1]);
+  });
 
   return touched;
 }
@@ -189,7 +255,9 @@ function reverseAngleHorizontally() {
   angle = -angle;
 }
 
-void draw(){  
+void draw(){
+  background();
+  drawField();
   if(step == STEP_PLAYER_POSITION) {
     drawStepPlayerPosition();
   } else if(step == STEP_PLAYER_ANGLE) {
@@ -197,6 +265,7 @@ void draw(){
   } else if(step == STEP_PLAYER_LASERING) {
     drawStepPlayerLasering();
   }
+  bloodSprites.draw();
 }
 
 function drawStepPlayerPosition() {
