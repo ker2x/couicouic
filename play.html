@@ -15,9 +15,11 @@
 
 <body>
 
+
 <div class="container">
+  <h1 style="text-align:center">World cut</h1>
   <!--PROCESSING NEEDED-->
-  <canvas id="mycanvas" style="height: 519px; width: 850px; background: #99FF99; margin: 0; padding: 0;"></canvas>
+  <canvas id="mycanvas" class="center-block" style="height: 519px; width: 850px; background: #99FF99; margin: 0 auto; padding: 0;"></canvas>
 
   <div class="row marketing">
     <div class="col-lg-6">
@@ -383,15 +385,15 @@ function drawStepPlayerLasering() {
         var str = "";
         for(var i =0; i < highScores.length; i++){
            str += "<tr>"+
-            "<td>" +
+            "<td><span class='label label-success'>" +
               highScores[i].currentScore + 
-            "</td>"+
-            "<td>"+
+            "</span></td>"+
+            "<td><span class='label label-info'>"+
             highScores[i].distance +
-            "</td>"+
-            "<td>"+
+            "</span></td>"+
+            "<td><span class='label label-danger'>"+
              highScores[i].heads +
-            "</td>"+
+            "</span></td>"+
           "</tr>";
         }
 
