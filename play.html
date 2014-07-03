@@ -93,8 +93,9 @@
       myDiv.style.border = "1px solid " + color[team];
       myDiv.style.position = "relative";
       myDiv.style.float = "left";
-      myDiv.style.left =  combinaisons[nb][0] +"px";
-      myDiv.style.top =  combinaisons[nb][1] +"px";
+      myDiv.style.clear = "both";
+      myDiv.style.left = combinaisons[nb][0] +"px";
+      myDiv.style.top = combinaisons[nb][1]-nb*icon_size +"px";
       myDiv.style.height = icon_size+"px";
       myDiv.style.width = icon_size +"px";
       myDiv.style.background = "url('team"+[team]+"/player"+[player]+".png')";

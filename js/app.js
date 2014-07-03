@@ -8,7 +8,7 @@ var height = 600;
 var width = 800;
 
 // color
-var color = ['white','blue']; 
+var color = ['black','blue'];
 
 // create positions for nb_player * nb_team player 
 // position of top left corner of the icon (icon_size)
