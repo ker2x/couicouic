@@ -21,7 +21,7 @@
 		var y = 200;
 		var velocity = 70;
 		var nbRebounds = 0;
-		var step = STEP_PLAYER_LASERING;
+		var step = STEP_PLAYER_POSITION;
 
 		void setup()
 		{
@@ -30,13 +30,12 @@
 		  background(0, 100, 0);
 		  fill(255);
 		  drawField();
-
-		  PFont fontA = loadFont("courier");
-		  textFont(fontA, 14);  
 		  stroke(0, 255, 255);
 		}
 
 		function drawField() {
+			stroke(0, 200, 0);
+			strokeWeight(4);
 			line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_HEIGHT);
 			line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_WIDTH, MARGIN_TOP_LEFT);
 			line(FIELD_WIDTH, MARGIN_TOP_LEFT, FIELD_WIDTH, FIELD_HEIGHT);
@@ -55,6 +54,15 @@
 			}
 		}
 
+		void mouseClicked() {
+			if(step == STEP_PLAYER_POSITION) {
+				step = STEP_PLAYER_ANGLE;
+			} else if(step == STEP_PLAYER_ANGLE) {
+				step = STEP_PLAYER_LASERING;
+			}
+			console.log("clic");
+		}
+
 		function reverseAngleHorizontally() {
 			angle = -angle;
 		}
@@ -70,15 +78,37 @@
 		}
 
 		function drawStepPlayerPosition() {
-
+			background();
+			drawField();
+			strokeWeight(20);
+			if(mouseY < MARGIN_TOP_LEFT) {
+				y = MARGIN_TOP_LEFT;
+			} else if(mouseY > FIELD_HEIGHT) {
+				y = FIELD_HEIGHT;
+			} else {
+				y = mouseY;
+			}
+			stroke(255, 0, 0);
+			point(MARGIN_TOP_LEFT, y);
 		}
 		function drawStepPlayerAngle() {
+			background();
+			drawField();
+			strokeWeight(20);
+			stroke(255, 0, 0);
+			point(MARGIN_TOP_LEFT, y);
+			strokeWeight(2);
+
+			angle = - Math.atan((mouseY - y) / (x - mouseX));
+
+			line(x, y, x + Math.cos(angle) * 30, y + Math.sin(angle) * 30);
 
 		}
 		function drawStepPlayerLasering() {
 			var nextX = x + Math.cos(angle) * velocity;
 			var nextY = y + Math.sin(angle) * velocity;
-
+			strokeWeight(4);
+			stroke(255, 0, 255);
 
 			var rebound = false;
 			if(nextY > FIELD_HEIGHT) {
