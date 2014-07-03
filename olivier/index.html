@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<script src="processing.js"></script> 
+	<script type="text/processing" data-processing-target="mycanvas">
+		var FIELD_WIDTH = 800;
+		var FIELD_HEIGHT = 600;
+		var MAX_REBOUNDS = 8;
+
+		var angle = 1.2;
+		var x = 0;
+		var y = 200;
+		var velocity = 50;
+		var nbRebounds = 0;
+
+		void setup()
+		{
+		  size(FIELD_WIDTH, FIELD_HEIGHT);
+		  background(125);
+		  fill(255);
+		  
+		  PFont fontA = loadFont("courier");
+		  textFont(fontA, 14);  
+		  stroke(0, 255, 0);
+		  strokeWeight(4);
+		}
+		var i=30;
+
+		void reverseAngleVertically() {
+			if(angle >= 0 && angle <= Math.PI / 2) {
+				angle = Math.PI - angle;
+			} else if(angle < 0 && angle >= -Math.PI / 2) {
+				angle = -Math.PI - angle;
+			} else if(angle > Math.PI / 2 && angle <= Math.PI) {
+				angle = Math.PI - angle;
+			} else  {
+				angle = -Math.PI - angle;
+			}
+		}
+
+		void reverseAngleHorizontally() {
+			angle = -angle;
+		}
+
+		void draw(){  
+		  var nextX = x + Math.cos(angle) * velocity;
+		  var nextY = y + Math.sin(angle) * velocity;
+
+
+		  var rebound = false;
+		  if(y > FIELD_HEIGHT) {
+		  	reverseAngleHorizontally();
+		  	nextY = FIELD_HEIGHT;
+		  	rebound = true;
+		  } 
+		  if(y < 0) {
+		  	reverseAngleHorizontally();
+		  	nextY = 0;
+		  	rebound = true;
+		  } 
+		  if(x > FIELD_WIDTH) {
+		  	reverseAngleVertically();
+		  	nextX = FIELD_WIDTH;
+		  	rebound = true;
+		  } 
+		  if(x < 0) {
+		  	reverseAngleVertically()
+		  	nextX = 0;
+		  	rebound = true;
+		  }
+
+		  if(rebound) {
+		  	nbRebounds++;
+		  }
+
+		  if(nbRebounds >= MAX_REBOUNDS) {
+		  	velocity = 0;
+		  }
+
+		  line(x, y, nextX, nextY);
+
+		  x = nextX;
+		  y = nextY;
+
+		}
+	</script>
+	<canvas id="mycanvas"></canvas>
+</body>
+</html>
