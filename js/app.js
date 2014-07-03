@@ -10,9 +10,9 @@ var width = 800;
 // color
 var color = ['black','blue'];
 
-// create positions for nb_player * nb_team player 
+// create positions for nb_player * nb_team player
 // position of top left corner of the icon (icon_size)
-// return array of array 
+// return array of array
 // example Array[[w,h],[w2,h2]]
 function placement() {
   // do not place too high, near the border, etc...
@@ -32,9 +32,9 @@ function placement() {
     var is_ok = true;
     var x = 0;
     while (x < combinaisons.length && is_ok) {
-      if (   w > combinaisons[x][0] - icon_size 
-        && w < combinaisons[x][0] + icon_size 
-        && h > combinaisons[x][1] - icon_size 
+      if (   w > combinaisons[x][0] - icon_size
+        && w < combinaisons[x][0] + icon_size
+        && h > combinaisons[x][1] - icon_size
         && h < combinaisons[x][1] + icon_size) {
         console.log("Un joueur mort sur la pelouse, appel du remplacant");
         is_ok = false;

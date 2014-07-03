@@ -1,39 +1,167 @@
-// Simple way to attach js code to the canvas is by using a function
-function sketchProc(processing) {
-  // Override draw function, by default it will be called 60 times per second
-  processing.draw = function() {
-    // determine center and max clock arm length
-    var centerX = processing.width / 2, centerY = processing.height / 2;
-    var maxArmLength = Math.min(centerX, centerY);
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <script src="../processing.js"></script> 
+  <script type="text/processing" data-processing-target="mycanvas">
+    var GAME_WIDTH = 800;
+    var GAME_HEIGHT = 600;
+    var FIELD_WIDTH = 780;
+    var FIELD_HEIGHT = 580;
+    var MARGIN_TOP_LEFT = 20;
+    var MARGIN_COLISSION = 100; // photo width
+    var MAX_REBOUNDS = 8;
+    var STEP_PLAYER_POSITION = 1;
+    var STEP_PLAYER_ANGLE = 2;
+    var STEP_PLAYER_LASERING = 3;
 
-    function drawArm(position, lengthScale, weight) {
-      processing.strokeWeight(weight);
-      processing.line(centerX, centerY,
-          centerX + Math.sin(position * 2 * Math.PI) * lengthScale * maxArmLength,
-          centerY - Math.cos(position * 2 * Math.PI) * lengthScale * maxArmLength);
+    var angle = 0.9;
+    var x = MARGIN_TOP_LEFT;
+    var y = 200;
+    var velocity = 70;
+    var nbRebounds = 0;
+    var step = STEP_PLAYER_POSITION;
+
+    void setup()
+    {
+      size(GAME_WIDTH, GAME_HEIGHT);
+      strokeWeight(4);
+      background(0, 100, 0);
+      fill(255);
+      drawField();
+      stroke(0, 255, 255);
     }
 
-    // erase background
-    processing.background(224);
+    function drawField() {
+      stroke(0, 200, 0);
+      strokeWeight(4);
+      line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_HEIGHT);
+      line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_WIDTH, MARGIN_TOP_LEFT);
+      line(FIELD_WIDTH, MARGIN_TOP_LEFT, FIELD_WIDTH, FIELD_HEIGHT);
+      line(MARGIN_TOP_LEFT, FIELD_HEIGHT, FIELD_WIDTH, FIELD_HEIGHT);
+    }
 
-    var now = new Date();
+    function reverseAngleVertically() {
+      if(angle >= 0 && angle <= Math.PI / 2) {
+        angle = Math.PI - angle;
+      } else if(angle < 0 && angle >= -Math.PI / 2) {
+        angle = -Math.PI - angle;
+      } else if(angle > Math.PI / 2 && angle <= Math.PI) {
+        angle = Math.PI - angle;
+      } else  {
+        angle = -Math.PI - angle;
+      }
+    }
 
-    // Moving hours arm by small increments
-    var hoursPosition = (now.getHours() % 12 + now.getMinutes() / 60) / 12;
-    drawArm(hoursPosition, 0.5, 5);
+    void mouseClicked() {
+      if(step == STEP_PLAYER_POSITION) {
+        step = STEP_PLAYER_ANGLE;
+      } else if(step == STEP_PLAYER_ANGLE) {
+        step = STEP_PLAYER_LASERING;
+      }
+      console.log("clic");
+    }
 
-    // Moving minutes arm by small increments
-    var minutesPosition = (now.getMinutes() + now.getSeconds() / 60) / 60;
-    drawArm(minutesPosition, 0.80, 3);
+    function reverseAngleHorizontally() {
+      angle = -angle;
+    }
 
-    // Moving hour arm by second increments
-    var secondsPosition = now.getSeconds() / 60;
-    drawArm(secondsPosition, 0.90, 1);
-  };
+    void draw(){
+      if(step == STEP_PLAYER_POSITION) {
+        drawStepPlayerPosition();
+      } else if(step == STEP_PLAYER_ANGLE) {
+        drawStepPlayerAngle();
+      } else if(step == STEP_PLAYER_LASERING) {
+        drawStepPlayerLasering();
+      }
+    }
 
-}
+    function drawStepPlayerPosition() {
+      background();
+      drawField();
+      strokeWeight(20);
+      if(mouseY < MARGIN_TOP_LEFT) {
+        y = MARGIN_TOP_LEFT;
+      } else if(mouseY > FIELD_HEIGHT) {
+        y = FIELD_HEIGHT;
+      } else {
+        y = mouseY;
+      }
+      stroke(255, 0, 0);
+      point(MARGIN_TOP_LEFT, y);
+    }
+    function drawStepPlayerAngle() {
+      background();
+      drawField();
+      strokeWeight(20);
+      stroke(255, 0, 0);
+      point(MARGIN_TOP_LEFT, y);
+      strokeWeight(2);
 
-var canvas = document.getElementById("canvas1");
-// attaching the sketchProc function to the canvas
-var p = new Processing(canvas, sketchProc);
-// p.exit(); to detach it
+      angle = - Math.atan((mouseY - y) / (x - mouseX));
+
+      line(x, y, x + Math.cos(angle) * 30, y + Math.sin(angle) * 30);
+
+    }
+    function drawStepPlayerLasering() {
+      var nextX = x + Math.cos(angle) * velocity;
+      var nextY = y + Math.sin(angle) * velocity;
+      strokeWeight(4);
+      stroke(255, 0, 255);
+
+      var rebound = false;
+      if(nextY > FIELD_HEIGHT) {
+        nextX = x - Math.tan(Math.PI / 2 + angle) * (FIELD_HEIGHT - y);
+        nextY = FIELD_HEIGHT;
+        rebound = true;
+        reverseAngleHorizontally();
+      }
+      if(nextY < MARGIN_TOP_LEFT) {
+        nextX = x + Math.tan(Math.PI / 2 + angle) * (y-MARGIN_TOP_LEFT);
+        nextY = MARGIN_TOP_LEFT;
+        rebound = true;
+        reverseAngleHorizontally();
+      }
+      if(nextX > FIELD_WIDTH) {
+        nextY = y + Math.tan(angle) * (FIELD_WIDTH - x);
+        nextX = FIELD_WIDTH;
+        rebound = true;
+        reverseAngleVertically();
+      }
+      if(nextX < MARGIN_TOP_LEFT) {
+        nextY = y - Math.tan(angle) * (x - MARGIN_TOP_LEFT);
+        nextX = MARGIN_TOP_LEFT;
+        rebound = true;
+       reverseAngleVertically()
+      }
+
+      if(rebound) {
+        nbRebounds++;
+      }
+
+      if(nbRebounds >= MAX_REBOUNDS) {
+        velocity = 0;
+      }
+
+      line(x, y, nextX, nextY);
+
+      x = nextX;
+      y = nextY;
+    }
+
+    function checkColission() {
+      var touched = []; //touché
+
+      touched = placement.filter( function(p) {
+        return p.x >= x + MARGIN_COLISSION &&  p.x >= x - MARGIN_COLISSION &&  p.y >= y + MARGIN_COLISSION &&  p.y >= y - MARGIN_COLISSION;
+      });
+
+      return touched.length > 0;
+    }
+
+  </script>
+  <canvas id="mycanvas" style="margin-left: 400px"></canvas>
+</body>
+</html>

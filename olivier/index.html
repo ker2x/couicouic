@@ -149,6 +149,16 @@
 			x = nextX;
 			y = nextY;
 		}
+
+		function checkColission() {
+      var touched = []; //touché
+
+      touched = placement.filter( function(p) {
+        return p.x >= x + MARGIN_COLISSION &&  p.x >= x - MARGIN_COLISSION &&  p.y >= y + MARGIN_COLISSION &&  p.y >= y - MARGIN_COLISSION;
+      });
+
+      return touched.length > 0;
+    }
 	</script>
 	<canvas id="mycanvas" style="margin-left: 400px"></canvas>
 </body>
