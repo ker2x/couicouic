@@ -4,32 +4,46 @@
 	<title></title>
 </head>
 <body>
-	<script src="processing.js"></script> 
+	<script src="../processing.js"></script> 
 	<script type="text/processing" data-processing-target="mycanvas">
-		var FIELD_WIDTH = 800;
-		var FIELD_HEIGHT = 600;
+		var GAME_WIDTH = 800;
+		var GAME_HEIGHT = 600;
+		var FIELD_WIDTH = 780;
+		var FIELD_HEIGHT = 580;
+		var MARGIN_TOP_LEFT = 20;
 		var MAX_REBOUNDS = 8;
+		var STEP_PLAYER_POSITION = 1;
+		var STEP_PLAYER_ANGLE = 2;
+		var STEP_PLAYER_LASERING = 3;
 
-		var angle = 1.2;
-		var x = 0;
+		var angle = 0.9;
+		var x = MARGIN_TOP_LEFT;
 		var y = 200;
-		var velocity = 50;
+		var velocity = 70;
 		var nbRebounds = 0;
+		var step = STEP_PLAYER_LASERING;
 
 		void setup()
 		{
-		  size(FIELD_WIDTH, FIELD_HEIGHT);
-		  background(125);
+		  size(GAME_WIDTH, GAME_HEIGHT);
+		  strokeWeight(4);
+		  background(0, 100, 0);
 		  fill(255);
-		  
+		  drawField();
+
 		  PFont fontA = loadFont("courier");
 		  textFont(fontA, 14);  
-		  stroke(0, 255, 0);
-		  strokeWeight(4);
+		  stroke(0, 255, 255);
 		}
-		var i=30;
 
-		void reverseAngleVertically() {
+		function drawField() {
+			line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_HEIGHT);
+			line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_WIDTH, MARGIN_TOP_LEFT);
+			line(FIELD_WIDTH, MARGIN_TOP_LEFT, FIELD_WIDTH, FIELD_HEIGHT);
+			line(MARGIN_TOP_LEFT, FIELD_HEIGHT, FIELD_WIDTH, FIELD_HEIGHT);
+		}
+
+		function reverseAngleVertically() {
 			if(angle >= 0 && angle <= Math.PI / 2) {
 				angle = Math.PI - angle;
 			} else if(angle < 0 && angle >= -Math.PI / 2) {
@@ -41,52 +55,71 @@
 			}
 		}
 
-		void reverseAngleHorizontally() {
+		function reverseAngleHorizontally() {
 			angle = -angle;
 		}
 
 		void draw(){  
-		  var nextX = x + Math.cos(angle) * velocity;
-		  var nextY = y + Math.sin(angle) * velocity;
+			if(step == STEP_PLAYER_POSITION) {
+				drawStepPlayerPosition();
+			} else if(step == STEP_PLAYER_ANGLE) {
+				drawStepPlayerAngle();
+			} else if(step == STEP_PLAYER_LASERING) {
+				drawStepPlayerLasering();
+			}
+		}
 
-
-		  var rebound = false;
-		  if(y > FIELD_HEIGHT) {
-		  	reverseAngleHorizontally();
-		  	nextY = FIELD_HEIGHT;
-		  	rebound = true;
-		  } 
-		  if(y < 0) {
-		  	reverseAngleHorizontally();
-		  	nextY = 0;
-		  	rebound = true;
-		  } 
-		  if(x > FIELD_WIDTH) {
-		  	reverseAngleVertically();
-		  	nextX = FIELD_WIDTH;
-		  	rebound = true;
-		  } 
-		  if(x < 0) {
-		  	reverseAngleVertically()
-		  	nextX = 0;
-		  	rebound = true;
-		  }
-
-		  if(rebound) {
-		  	nbRebounds++;
-		  }
-
-		  if(nbRebounds >= MAX_REBOUNDS) {
-		  	velocity = 0;
-		  }
-
-		  line(x, y, nextX, nextY);
-
-		  x = nextX;
-		  y = nextY;
+		function drawStepPlayerPosition() {
 
 		}
+		function drawStepPlayerAngle() {
+
+		}
+		function drawStepPlayerLasering() {
+			var nextX = x + Math.cos(angle) * velocity;
+			var nextY = y + Math.sin(angle) * velocity;
+
+
+			var rebound = false;
+			if(nextY > FIELD_HEIGHT) {
+				nextX = x - Math.tan(Math.PI / 2 + angle) * (FIELD_HEIGHT - y);
+				nextY = FIELD_HEIGHT;
+				rebound = true;
+				reverseAngleHorizontally();
+			} 
+			if(nextY < MARGIN_TOP_LEFT) {
+				nextX = x + Math.tan(Math.PI / 2 + angle) * (y-MARGIN_TOP_LEFT);
+				nextY = MARGIN_TOP_LEFT;
+				rebound = true;
+				reverseAngleHorizontally();
+			} 
+			if(nextX > FIELD_WIDTH) {
+				nextY = y + Math.tan(angle) * (FIELD_WIDTH - x);
+				nextX = FIELD_WIDTH;
+				rebound = true;
+				reverseAngleVertically();
+			} 
+			if(nextX < MARGIN_TOP_LEFT) {
+				nextY = y - Math.tan(angle) * (x - MARGIN_TOP_LEFT);
+				nextX = MARGIN_TOP_LEFT;
+				rebound = true;
+			 reverseAngleVertically()
+			}
+
+			if(rebound) {
+				nbRebounds++;
+			}
+
+			if(nbRebounds >= MAX_REBOUNDS) {
+				velocity = 0;
+			}
+
+			line(x, y, nextX, nextY);
+
+			x = nextX;
+			y = nextY;
+		}
 	</script>
-	<canvas id="mycanvas"></canvas>
+	<canvas id="mycanvas" style="margin-left: 400px"></canvas>
 </body>
 </html>
