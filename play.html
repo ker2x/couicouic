@@ -26,7 +26,7 @@
       <h2>Your score</h2>
       <h3>
         Heads cut :
-        <span class="label label-danger"><span id="heads">O</span> heads</span>
+        <span class="label label-danger"><span id="heads">0</span> heads</span>
       </h3>
       <h3>
         Distance :
@@ -60,10 +60,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title">Coupe du Monde !</h4>
+        <h4 class="modal-title">World cut !</h4>
       </div>
       <div class="modal-body" style="text-align: center">
-        <button type="button" class="btn btn-primary" data-dismiss="modal" id="replayButton" style='margin: 30px 0'>Rejouer</button>
+        <p>You have traveled <span style="font-weight: bold" id="modalDistance"></span> meters</p>
+        <p>You have cut <span style="font-weight: bold" id="modalHeads"></span> heads</p>
+        <p>Your score is <span style="font-weight: bold" id="modalScore"></span> points</p>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="replayButton" style='margin: 30px 0'>Replay</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
@@ -212,6 +215,7 @@ function replay() {
   currentScore = 0;
   velocity = 20;
   step = STEP_PLAYER_POSITION;
+  cptGameOver = 0;
 }
 
 function loadImages() {
@@ -378,7 +382,7 @@ function drawStepPlayerLasering() {
 
             highScores.sort(function(a,b){
               console.log(a);
-              return a.currentScore - b.currentScore;
+              return b.currentScore - a.currentScore;
             });
         }
         // //display
@@ -404,7 +408,7 @@ function drawStepPlayerLasering() {
       velocity = 0;
     
   } else {
-    distance += velocity;
+    distance += Math.round(velocity * 130 / 800);
   }
 
   
@@ -433,8 +437,12 @@ function drawStepPlayerLasering() {
     heads++;
     document.getElementById("score").innerHTML = currentScore;
     document.getElementById("heads").innerHTML = heads;
+
+    document.getElementById("modalScore").innerHTML = currentScore;
+    document.getElementById("modalHeads").innerHTML = heads;
   }
   document.getElementById("distance").innerHTML = distance;
+  document.getElementById("modalDistance").innerHTML = distance;
   
 }
 
@@ -442,6 +450,7 @@ function drawStepPlayerEnd() {
   $('#replayModal').modal();
   replay();
 }
+
 
 function placement() {
   // do not place too high, near the border, etc...
