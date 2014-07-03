@@ -176,7 +176,8 @@ var currentScore = 0;
 var heads = 0;
 var distance = 0;
 var bloodSprites = null;
-var highScores = []; 
+var highScores = [];
+var shuriken = null;
 var fieldImage;
 
 void setup()
@@ -194,6 +195,7 @@ void setup()
   stroke(0, 255, 255);
   bloodSprites = new BloodSprites();
   sound = new Audio("keru/scream.mp3");
+  shuriken = loadImage("shuriken.png");
 }
 
 function replay() {
@@ -403,7 +405,11 @@ function drawStepPlayerLasering() {
     distance += velocity;
   }
 
-  line(x, y, nextX, nextY);
+  
+  // line(x, y, nextX, nextY);
+
+  // Here use the shuriken png instead
+  image(shuriken, x-20, y-20);
 
   x = nextX;
   y = nextY;
