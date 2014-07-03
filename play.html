@@ -17,7 +17,7 @@
 
 <div class="container">
   <!--PROCESSING NEEDED-->
-  <canvas id="mycanvas" style="height: 600px; width: 800px; background: #99FF99; margin: 0; padding: 0;"  height="600" width="600"></canvas>
+  <canvas id="mycanvas" style="height: 519px; width: 850px; background: #99FF99; margin: 0; padding: 0;"></canvas>
 
   <div class="row marketing">
     <div class="col-lg-6">
@@ -28,7 +28,7 @@
       </h3>
       <h3>
         Distance :
-        <span class="label label-info"><span id="distance">O</span> meters</span>
+        <span class="label label-info"><span id="distance">0</span> meters</span>
       </h3>
       <h3>
         Points :
@@ -53,10 +53,27 @@
 </div> <!-- /container -->
 
 
+<div id="replayModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Coupe du Monde !</h4>
+      </div>
+      <div class="modal-body" style="text-align: center">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="replayButton" style='margin: 30px 0'>Rejouer</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<!--<script src="js/bootstrap.min.js"></script>-->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
 
 <!--PROCESSING-->
 <script src="js/processing.js"></script>
@@ -129,15 +146,16 @@ class BloodSprites {
 
 // size : 800*600
 var ICON_SIZE = 45; // used to calculat position for left corner
-var GAME_WIDTH = 800;
-var GAME_HEIGHT = 600;
-var FIELD_WIDTH = 760;
-var FIELD_HEIGHT = 560;
-var MARGIN_TOP_LEFT = 40;
+var GAME_WIDTH = 850;
+var GAME_HEIGHT = 519;
+var FIELD_WIDTH = 800;
+var FIELD_HEIGHT = 498;
+var MARGIN_TOP_LEFT = 26;
 var MAX_REBOUNDS = 8;
 var STEP_PLAYER_POSITION = 1;
 var STEP_PLAYER_ANGLE = 2;
 var STEP_PLAYER_LASERING = 3;
+var STEP_PLAYER_END = 4;
 var MARGIN_COLISSION = 45;
 var nb_player = 11;
 var nb_team = 2;
@@ -159,6 +177,7 @@ var heads = 0;
 var distance = 0;
 var bloodSprites = null;
 var highScores = []; 
+var fieldImage;
 
 void setup()
 {
@@ -166,12 +185,29 @@ void setup()
   size(GAME_WIDTH, GAME_HEIGHT);
   strokeWeight(4);
   background(0, 100, 0);
+
+  fieldImage = loadImage("terrain.png");
+  
   fill(255);
   loadImages();
   drawField();
   stroke(0, 255, 255);
   bloodSprites = new BloodSprites();
   sound = new Audio("keru/scream.mp3");
+}
+
+function replay() {
+  playersPositions = placement();
+  loadImages();
+  x = MARGIN_TOP_LEFT;
+  y = 200;
+  nbRebounds = 0;
+  heads = 0;
+  distance = 0;
+  currentScoreIncrement = 10;
+  currentScore = 0;
+  velocity = 20;
+  step = STEP_PLAYER_POSITION;
 }
 
 function loadImages() {
@@ -190,17 +226,14 @@ function drawPlayers() {
   for(var i=0;i<playersPositions.length;i++) {
     image(playersPositions[i][2], playersPositions[i][0], playersPositions[i][1]);
   }
-
 }
 
 function drawField() {
   stroke(0, 200, 0);
   strokeWeight(4);
-  line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_HEIGHT);
-  line(MARGIN_TOP_LEFT, MARGIN_TOP_LEFT, FIELD_WIDTH, MARGIN_TOP_LEFT);
-  line(FIELD_WIDTH, MARGIN_TOP_LEFT, FIELD_WIDTH, FIELD_HEIGHT);
-  line(MARGIN_TOP_LEFT, FIELD_HEIGHT, FIELD_WIDTH, FIELD_HEIGHT);
-
+  image(fieldImage, 24, 24);
+  strokeWeight(1);
+  stroke(10, 10, 10);
   drawPlayers();
 }
 
@@ -235,7 +268,6 @@ void mouseClicked() {
   } else if(step == STEP_PLAYER_ANGLE) {
     step = STEP_PLAYER_LASERING;
   }
-  console.log("clic");
 }
 
 function reverseAngleHorizontally() {
@@ -251,6 +283,8 @@ void draw(){
     drawStepPlayerAngle();
   } else if(step == STEP_PLAYER_LASERING) {
     drawStepPlayerLasering();
+  } else if(step == STEP_PLAYER_END) {
+    drawStepPlayerEnd();
   }
   bloodSprites.draw();
 }
@@ -322,6 +356,8 @@ function drawStepPlayerLasering() {
   }
 
   if(nbRebounds >= MAX_REBOUNDS) {
+    velocity = 0;
+    step = STEP_PLAYER_END;
    //GAME OVER
    if( cptGameOver != 1 ){
       cptGameOver = 1;
@@ -392,6 +428,11 @@ function drawStepPlayerLasering() {
   }
   document.getElementById("distance").innerHTML = distance;
   
+}
+
+function drawStepPlayerEnd() {
+  $('#replayModal').modal();
+  replay();
 }
 
 function placement() {
